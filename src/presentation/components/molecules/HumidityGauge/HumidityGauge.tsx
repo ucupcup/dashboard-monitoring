@@ -1,17 +1,14 @@
-import React from 'react';
-import { Card } from '@/presentation/components/atoms/Card/Card';
-import { formatHumidity } from '@/shared/utils/formatters';
-import { getHumidityColor } from '@/shared/utils/converters';
+import React from "react";
+import { Card } from "../../../components/atoms/Card/Card";
+import { formatHumidity } from "../../../../shared/utils/formatters";
+import { getHumidityColor } from "../../../../shared/utils/converters";
 
 export interface HumidityGaugeProps {
   value: number;
   label: string;
 }
 
-export const HumidityGauge: React.FC<HumidityGaugeProps> = ({
-  value,
-  label,
-}) => {
+export const HumidityGauge: React.FC<HumidityGaugeProps> = ({ value, label }) => {
   const percentage = Math.min(value, 100);
   const strokeDasharray = 2 * Math.PI * 45;
   const strokeDashoffset = strokeDasharray - (strokeDasharray * percentage) / 100;
@@ -23,30 +20,11 @@ export const HumidityGauge: React.FC<HumidityGaugeProps> = ({
       <div className="flex justify-center">
         <div className="relative w-32 h-32 flex items-center justify-center">
           <svg className="w-32 h-32 transform -rotate-90">
-            <circle
-              cx="64"
-              cy="64"
-              r="45"
-              stroke="rgb(75, 85, 99)"
-              strokeWidth="8"
-              fill="none"
-            />
-            <circle
-              cx="64"
-              cy="64"
-              r="45"
-              stroke="rgb(249, 115, 22)"
-              strokeWidth="8"
-              fill="none"
-              strokeDasharray={strokeDasharray}
-              strokeDashoffset={strokeDashoffset}
-              className="transition-all duration-500"
-            />
+            <circle cx="64" cy="64" r="45" stroke="rgb(75, 85, 99)" strokeWidth="8" fill="none" />
+            <circle cx="64" cy="64" r="45" stroke="rgb(249, 115, 22)" strokeWidth="8" fill="none" strokeDasharray={strokeDasharray} strokeDashoffset={strokeDashoffset} className="transition-all duration-500" />
           </svg>
           <div className="absolute text-center">
-            <div className={`text-2xl font-bold ${colorClass}`}>
-              {formatHumidity(value)}
-            </div>
+            <div className={`text-2xl font-bold ${colorClass}`}>{formatHumidity(value)}</div>
           </div>
         </div>
       </div>

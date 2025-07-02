@@ -1,9 +1,10 @@
-import { IDeviceRepository } from '@/domain/repositories/IDeviceRepository';
-import { Device } from '@/domain/entities/Device';
-import { DeviceConfig, DeviceCommand } from '@/domain/types/device';
-import { deviceApi, DeviceApiResponse } from '@/infrastructure/api/endpoints/deviceApi';
-import { webSocketClient } from '@/infrastructure/api/client/websocketClient';
-import { WEBSOCKET_EVENTS } from '@/infrastructure/utils/constants';
+import type { IDeviceRepository } from "../../DTO/repositories/IDeviceRepository";
+import { Device } from "../../DTO/entities/Device";
+import type { DeviceConfig, DeviceCommand } from "../../DTO/types/device";
+import type { DeviceApiResponse } from "../../infrastructure/api/endpoints/deviceApi";
+import { deviceApi } from "../../infrastructure/api/endpoints/deviceApi";
+import { webSocketClient } from "../../infrastructure/api/client/websocketClient";
+import { WEBSOCKET_EVENTS } from "../../infrastructure/utils/constants";
 
 export class DeviceRepository implements IDeviceRepository {
   public async getDevice(deviceId: string): Promise<Device> {
@@ -15,10 +16,7 @@ export class DeviceRepository implements IDeviceRepository {
     }
   }
 
-  public async updateDeviceConfig(
-    deviceId: string,
-    config: Partial<DeviceConfig>
-  ): Promise<Device> {
+  public async updateDeviceConfig(deviceId: string, config: Partial<DeviceConfig>): Promise<Device> {
     try {
       const response = await deviceApi.updateDeviceConfig(deviceId, config);
       return this.mapApiResponseToDevice(response);
@@ -35,10 +33,7 @@ export class DeviceRepository implements IDeviceRepository {
     }
   }
 
-  public subscribeToDeviceStatus(
-    deviceId: string,
-    callback: (device: Device) => void
-  ): () => void {
+  public subscribeToDeviceStatus(deviceId: string, callback: (device: Device) => void): () => void {
     const handleDeviceStatusUpdate = (data: unknown) => {
       try {
         const response = data as DeviceApiResponse;
@@ -47,7 +42,7 @@ export class DeviceRepository implements IDeviceRepository {
           callback(device);
         }
       } catch (error) {
-        console.error('Error processing device status update:', error);
+        console.error("Error processing device status update:", error);
       }
     };
 
@@ -55,14 +50,6 @@ export class DeviceRepository implements IDeviceRepository {
   }
 
   private mapApiResponseToDevice(response: DeviceApiResponse): Device {
-    return new Device(
-      response.id,
-      response.name,
-      response.status,
-      response.config,
-      new Date(response.lastSeen),
-      new Date(response.createdAt),
-      new Date(response.updatedAt)
-    );
+    return new Device(response.id, response.name, response.status, response.config, new Date(response.lastSeen), new Date(response.createdAt), new Date(response.updatedAt));
   }
 }

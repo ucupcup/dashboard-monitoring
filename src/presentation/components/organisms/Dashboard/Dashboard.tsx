@@ -1,14 +1,13 @@
-import React from 'react';
-import { MonitoringPanel } from '@/presentation/components/organisms/MonitoringPanel/MonitoringPanel';
-import { ControlPanel } from '@/presentation/components/organisms/ControlPanel/ControlPanel';
-import { FanController } from '@/presentation/components/molecules/FanController/FanController';
-import { StatusIndicator } from '@/presentation/components/molecules/StatusIndicator/StatusIndicator';
-import { TerminalLog } from '@/presentation/components/molecules/TerminalLog/TerminalLog';
-import { useTemperatureData } from '@/app/hooks/useTemperatureData';
-import { useWebSocket } from '@/app/hooks/useWebSocket';
-import { useAutoFanControl } from '@/app/hooks/useAutoFanControl';
-import { useError, useIsLoading } from '@/app/store/dashboardStore';
-
+import React from "react";
+import { MonitoringPanel } from "../MonitoringPanel/MonitoringPanel";
+import { ControlPanel } from "../ControlPanel/ControlPanel";
+import { FanController } from "../../molecules/FanController/FanControl";
+import { StatusIndicator } from "../../molecules/StatusIndicator/StatusIndicator";
+import { TerminalLog } from "../../molecules/TerminalLog/TerminalLog";
+import { useTemperatureData } from "../../../../app/hooks/useTemperatureData";
+import { useWebSocket } from "../../../../app/hooks/useWebSocket";
+import { useAutoFanControl } from "../../../../app/hooks/useAutoFanControl";
+import { useError, useIsLoading } from "../../../../app/store/dashboardStore";
 export const Dashboard: React.FC = () => {
   // Initialize hooks
   useTemperatureData();
@@ -34,12 +33,8 @@ export const Dashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Sistem Monitoring Suhu Peternakan Ayam Broiler
-          </h1>
-          <div className="text-gray-400">
-            Real-time monitoring dan kontrol otomatis
-          </div>
+          <h1 className="text-3xl font-bold text-white mb-2">Sistem Monitoring Suhu Peternakan Ayam Broiler</h1>
+          <div className="text-gray-400">Real-time monitoring dan kontrol otomatis</div>
           {isLoading && (
             <div className="mt-4 flex justify-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
@@ -80,11 +75,9 @@ export const Dashboard: React.FC = () => {
           <div className="flex justify-between items-center text-sm">
             <div className="text-white">
               <span className="text-green-400 mr-2">●</span>
-              ESP32 Status - Last update: {new Date().toLocaleTimeString('id-ID')}
+              ESP32 Status - Last update: {new Date().toLocaleTimeString("id-ID")}
             </div>
-            <div className="text-gray-400">
-              Chicken Farm Dashboard v1.0
-            </div>
+            <div className="text-gray-400">Chicken Farm Dashboard v1.0</div>
           </div>
         </div>
       </div>

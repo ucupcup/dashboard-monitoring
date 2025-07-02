@@ -1,9 +1,9 @@
-import React from 'react';
-import { Card } from '@/presentation/components/atoms/Card/Card';
-import { Toggle } from '@/presentation/components/atoms/Toggle/Toggle';
-import { Button } from '@/presentation/components/atoms/Button/Button';
-import { useFanControl } from '@/app/hooks/useFanControl';
-import { useFan, useManualMode } from '@/app/store/dashboardStore';
+import React from "react";
+import { Card } from "../../../components/atoms/Card/Card";
+import { Toggle } from "../../../components/atoms/Toggle/Toggle";
+import { Button } from "../../../components/atoms/Button/Button";
+import { useFanControl } from "../../../../app/hooks/useFanControl";
+import { useFan, useManualMode } from "../../../../app/store/dashboardStore";
 
 export const FanController: React.FC = () => {
   const fan = useFan();
@@ -12,7 +12,7 @@ export const FanController: React.FC = () => {
 
   const handleFanToggle = async () => {
     if (!fan || !manualMode) return;
-    const newState = fan.isOn() ? 'off' : 'on';
+    const newState = fan.isOn() ? "off" : "on";
     await controlFan(newState);
   };
 
@@ -22,27 +22,12 @@ export const FanController: React.FC = () => {
         <div>
           <h3 className="text-lg font-semibold text-white mb-4">Fan Control</h3>
           <div className="space-y-4">
-            <Toggle
-              isOn={fan?.isOn() || false}
-              onToggle={handleFanToggle}
-              disabled={!manualMode}
-              label="Fan Switch"
-            />
+            <Toggle isOn={fan?.isOn() || false} onToggle={handleFanToggle} disabled={!manualMode} label="Fan Switch" />
             <div className="flex gap-2">
-              <Button
-                variant="success"
-                size="sm"
-                onClick={() => controlFan('on')}
-                disabled={!manualMode}
-              >
+              <Button variant="success" size="sm" onClick={() => controlFan("on")} disabled={!manualMode}>
                 Turn On
               </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => controlFan('off')}
-                disabled={!manualMode}
-              >
+              <Button variant="danger" size="sm" onClick={() => controlFan("off")} disabled={!manualMode}>
                 Turn Off
               </Button>
             </div>

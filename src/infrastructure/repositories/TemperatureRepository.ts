@@ -1,54 +1,42 @@
-import { httpClient } from '@/infrastructure/api/client/httpClient';
-import { API_ENDPOINTS } from '@/infrastructure/utils/constants';
-import { ApiResponse } from '@/domain/types/common';
-import { DeviceConfig, DeviceCommand } from '@/domain/types/device';
+import type { ITemperatureRepository } from "../../DTO/repositories/ITemperatureRepository";
+import { Temperature } from "../../DTO/entities/Temperature";
+import { temperatureApi } from "../../infrastructure/api/endpoints/temperatureApi";
+import { webSocketClient } from "../../infrastructure/api/client/websocketClient";
+import { WEBSOCKET_EVENTS } from "../../infrastructure/utils/constants";
+import type { TemperatureReading } from "../../DTO/types/sensor";
 
-export interface DeviceApiResponse {
-  id: string;
-  name: string;
-  status: 'online' | 'offline' | 'error';
-  config: DeviceConfig;
-  lastSeen: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export class DeviceApi {
-  public async getDevice(deviceId: string): Promise<DeviceApiResponse> {
-    const response = await httpClient.get<ApiResponse<DeviceApiResponse>>(
-      `${API_ENDPOINTS.DEVICE}/${deviceId}`
-    );
-    return response.data;
+export class TemperatureRepository implements ITemperatureRepository {
+  public async getCurrentTemperature(deviceId: string): Promise<Temperature> {
+    try {
+      const reading = await temperatureApi.getCurrentTemperature(deviceId);
+      return Temperature.fromReading(reading);
+    } catch (error) {
+      throw new Error(`Failed to get current temperature: ${error}`);
+    }
   }
 
-  public async updateDeviceConfig(
-    deviceId: string,
-    config: Partial<DeviceConfig>
-  ): Promise<DeviceApiResponse> {
-    const response = await httpClient.put<ApiResponse<DeviceApiResponse>>(
-      `${API_ENDPOINTS.DEVICE}/${deviceId}/config`,
-      config
-    );
-    return response.data;
+  public async getTemperatureHistory(deviceId: string, limit = 100): Promise<Temperature[]> {
+    try {
+      const readings = await temperatureApi.getTemperatureHistory(deviceId, limit);
+      return readings.map((reading) => Temperature.fromReading(reading));
+    } catch (error) {
+      throw new Error(`Failed to get temperature history: ${error}`);
+    }
   }
 
-  public async sendCommand(
-    deviceId: string,
-    command: DeviceCommand
-  ): Promise<boolean> {
-    const response = await httpClient.post<ApiResponse<{ success: boolean }>>(
-      `${API_ENDPOINTS.DEVICE}/${deviceId}/commands`,
-      command
-    );
-    return response.data.success;
-  }
+  public subscribeToTemperatureUpdates(deviceId: string, callback: (temperature: Temperature) => void): () => void {
+    const handleTemperatureUpdate = (data: unknown) => {
+      try {
+        const reading = data as TemperatureReading;
+        if (reading.deviceId === deviceId) {
+          const temperature = Temperature.fromReading(reading);
+          callback(temperature);
+        }
+      } catch (error) {
+        console.error("Error processing temperature update:", error);
+      }
+    };
 
-  public async getDeviceStatus(deviceId: string): Promise<'online' | 'offline' | 'error'> {
-    const response = await httpClient.get<ApiResponse<{ status: 'online' | 'offline' | 'error' }>>(
-      `${API_ENDPOINTS.DEVICE}/${deviceId}/status`
-    );
-    return response.data.status;
+    return webSocketClient.on(WEBSOCKET_EVENTS.TEMPERATURE_UPDATE, handleTemperatureUpdate);
   }
 }
-
-export const deviceApi = new DeviceApi();

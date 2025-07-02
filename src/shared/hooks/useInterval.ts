@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 export const useInterval = (callback: () => void, delay: number | null): void => {
-  const savedCallback = useRef<() => void>();
+  const savedCallback = useRef<() => void>(callback); // Fix: tambahkan initial value
 
   useEffect(() => {
     savedCallback.current = callback;

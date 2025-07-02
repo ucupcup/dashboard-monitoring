@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Card } from '@/presentation/components/atoms/Card/Card';
-import { useTemperature, useHumidity, useFan, useIsConnected } from '@/app/store/dashboardStore';
-import { formatTimestamp } from '@/shared/utils/formatters';
-
+import React, { useState, useEffect } from "react";
+import { Card } from "../../../components/atoms/Card/Card";
+import { useTemperature, useHumidity, useFan, useIsConnected } from "../../../../app/store/dashboardStore";
+import { formatTimestamp } from "../../../../shared/utils/formatters";
 interface LogEntry {
   id: string;
   timestamp: Date;
   message: string;
-  type: 'info' | 'warning' | 'error';
+  type: "info" | "warning" | "error";
 }
 
 export const TerminalLog: React.FC = () => {
@@ -17,51 +16,54 @@ export const TerminalLog: React.FC = () => {
   const fan = useFan();
   const isConnected = useIsConnected();
 
-  const addLog = (message: string, type: LogEntry['type'] = 'info') => {
+  const addLog = (message: string, type: LogEntry["type"] = "info") => {
     const newLog: LogEntry = {
       id: `${Date.now()}_${Math.random()}`,
       timestamp: new Date(),
       message,
       type,
     };
-    setLogs(prev => [...prev.slice(-19), newLog]); // Keep last 20 logs
+    setLogs((prev) => [...prev.slice(-19), newLog]); // Keep last 20 logs
   };
 
   useEffect(() => {
-    addLog('System started...', 'info');
+    addLog("System started...", "info");
   }, []);
 
   useEffect(() => {
     if (isConnected) {
-      addLog('ESP32 connected', 'info');
+      addLog("ESP32 connected", "info");
     } else {
-      addLog('ESP32 disconnected', 'warning');
+      addLog("ESP32 disconnected", "warning");
     }
   }, [isConnected]);
 
   useEffect(() => {
     if (temperature) {
-      addLog(`Temperature: ${temperature.toCelsius().toFixed(1)}°C`, 'info');
+      addLog(`Temperature: ${temperature.toCelsius().toFixed(1)}°C`, "info");
     }
   }, [temperature]);
 
   useEffect(() => {
     if (humidity) {
-      addLog(`Humidity: ${humidity.value.toFixed(1)}%`, 'info');
+      addLog(`Humidity: ${humidity.value.toFixed(1)}%`, "info");
     }
   }, [humidity]);
 
   useEffect(() => {
     if (fan) {
-      addLog(`Fan: ${fan.isOn() ? 'ON' : 'OFF'}`, 'info');
+      addLog(`Fan: ${fan.isOn() ? "ON" : "OFF"}`, "info");
     }
   }, [fan]);
 
-  const getLogColor = (type: LogEntry['type']) => {
+  const getLogColor = (type: LogEntry["type"]) => {
     switch (type) {
-      case 'error': return 'text-red-400';
-      case 'warning': return 'text-yellow-400';
-      default: return 'text-green-400';
+      case "error":
+        return "text-red-400";
+      case "warning":
+        return "text-yellow-400";
+      default:
+        return "text-green-400";
     }
   };
 
