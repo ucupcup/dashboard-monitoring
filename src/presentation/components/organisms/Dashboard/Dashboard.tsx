@@ -8,6 +8,9 @@ import { useTemperatureData } from "../../../../app/hooks/useTemperatureData";
 import { useWebSocket } from "../../../../app/hooks/useWebSocket";
 import { useAutoFanControl } from "../../../../app/hooks/useAutoFanControl";
 import { useError, useIsLoading } from "../../../../app/store/dashboardStore";
+import { ConnectionStatus } from "../../molecules/ConnectionStatus/ConnectionStatus";
+
+
 export const Dashboard: React.FC = () => {
   // Initialize hooks
   useTemperatureData();
@@ -40,6 +43,11 @@ export const Dashboard: React.FC = () => {
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
             </div>
           )}
+        </div>
+
+        {/* Connection Status */}
+        <div className="mb-6">
+          <ConnectionStatus />
         </div>
 
         {/* Monitoring Panel */}

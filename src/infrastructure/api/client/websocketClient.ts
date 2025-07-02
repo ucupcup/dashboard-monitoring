@@ -1,5 +1,4 @@
 import { config } from '../../utils/config';
-import { WEBSOCKET_EVENTS } from '../../utils/constants';
 
 export type WebSocketEventHandler = (data: unknown) => void;
 
@@ -20,24 +19,30 @@ export class WebSocketClient {
 
   public connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (this.isConnecting) {
+      if (this.isConnecting || this.isConnected) {
+        resolve();
         return;
       }
 
       this.isConnecting = true;
+      console.log(`Connecting to WebSocket: ${config.websocket.url}`);
+      
       this.ws = new WebSocket(config.websocket.url);
 
       this.ws.onopen = () => {
-        console.log('WebSocket connected');
+        console.log('WebSocket connected to backend server');
         this.isConnecting = false;
         this.reconnectAttempts = 0;
-        this.connectionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        this.connectionId = `react_client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         
-        // Send connection event
-        this.emitEvent(WEBSOCKET_EVENTS.DEVICE_STATUS, {
-          status: 'connected',
-          connectionId: this.connectionId,
-          timestamp: Date.now(),
+        // Send initial connection message
+        this.send({
+          type: 'client_connected',
+          data: {
+            clientType: 'react_dashboard',
+            connectionId: this.connectionId,
+            timestamp: Date.now()
+          }
         });
         
         resolve();
@@ -46,43 +51,26 @@ export class WebSocketClient {
       this.ws.onmessage = (event) => {
         try {
           const message: WebSocketMessage = JSON.parse(event.data);
+          console.log('WebSocket message received:', message.type, message.data);
           this.handleMessage(message);
         } catch (error) {
           console.error('WebSocket message parsing error:', error);
-          this.emitEvent(WEBSOCKET_EVENTS.ERROR, {
-            type: 'parse_error',
-            error: error instanceof Error ? error.message : 'Unknown parsing error',
-            rawData: event.data,
-          });
         }
       };
 
       this.ws.onclose = (event) => {
         console.log('WebSocket disconnected', { code: event.code, reason: event.reason });
         this.isConnecting = false;
+        this.connectionId = null;
         
-        // Emit disconnect event
-        this.emitEvent(WEBSOCKET_EVENTS.DEVICE_STATUS, {
-          status: 'disconnected',
-          code: event.code,
-          reason: event.reason,
-          timestamp: Date.now(),
-        });
-        
-        this.scheduleReconnect();
+        if (event.code !== 1000) { // Not a normal closure
+          this.scheduleReconnect();
+        }
       };
 
       this.ws.onerror = (error) => {
         console.error('WebSocket error:', error);
         this.isConnecting = false;
-        
-        // Emit error event
-        this.emitEvent(WEBSOCKET_EVENTS.ERROR, {
-          type: 'connection_error',
-          error: 'WebSocket connection failed',
-          timestamp: Date.now(),
-        });
-        
         reject(error);
       };
     });
@@ -90,13 +78,6 @@ export class WebSocketClient {
 
   public disconnect(): void {
     if (this.ws) {
-      // Send disconnect notification before closing
-      this.emitEvent(WEBSOCKET_EVENTS.DEVICE_STATUS, {
-        status: 'disconnecting',
-        connectionId: this.connectionId,
-        timestamp: Date.now(),
-      });
-      
       this.ws.close(1000, 'Client disconnect');
       this.ws = null;
     }
@@ -110,7 +91,6 @@ export class WebSocketClient {
     }
     this.eventHandlers.get(event)!.push(handler);
 
-    // Return unsubscribe function
     return () => {
       const handlers = this.eventHandlers.get(event);
       if (handlers) {
@@ -130,39 +110,42 @@ export class WebSocketClient {
         connectionId: this.connectionId,
       };
       this.ws.send(JSON.stringify(messageWithTimestamp));
+      console.log('WebSocket message sent:', message);
     } else {
-      console.warn('WebSocket is not connected');
-      this.emitEvent(WEBSOCKET_EVENTS.ERROR, {
-        type: 'send_error',
-        message: 'Cannot send message: WebSocket not connected',
-        data: message,
-      });
+      console.warn('WebSocket is not connected, message not sent:', message);
     }
   }
 
-  // Utility methods using WEBSOCKET_EVENTS
-  public subscribeToTemperature(handler: WebSocketEventHandler): () => void {
-    return this.on(WEBSOCKET_EVENTS.TEMPERATURE_UPDATE, handler);
+  // Specific methods for ESP32 communication
+  public sendFanControl(state: boolean): void {
+    this.send({
+      type: 'fan_control',
+      data: { state }
+    });
   }
 
-  public subscribeToHumidity(handler: WebSocketEventHandler): () => void {
-    return this.on(WEBSOCKET_EVENTS.HUMIDITY_UPDATE, handler);
+  public sendThresholdUpdate(threshold: number): void {
+    this.send({
+      type: 'threshold_update',
+      data: { threshold }
+    });
   }
 
-  public subscribeToFanStatus(handler: WebSocketEventHandler): () => void {
-    return this.on(WEBSOCKET_EVENTS.FAN_STATUS, handler);
+  public sendModeChange(autoMode: boolean, manualMode: boolean): void {
+    this.send({
+      type: 'mode_change',
+      data: { autoMode, manualMode }
+    });
   }
 
-  public subscribeToDeviceStatus(handler: WebSocketEventHandler): () => void {
-    return this.on(WEBSOCKET_EVENTS.DEVICE_STATUS, handler);
-  }
-
-  public subscribeToErrors(handler: WebSocketEventHandler): () => void {
-    return this.on(WEBSOCKET_EVENTS.ERROR, handler);
+  public requestDeviceStatus(): void {
+    this.send({
+      type: 'request_status',
+      data: {}
+    });
   }
 
   private handleMessage(message: WebSocketMessage): void {
-    // Validate message structure
     if (!message.type) {
       console.warn('Received message without type:', message);
       return;
@@ -175,22 +158,8 @@ export class WebSocketClient {
           handler(message.data);
         } catch (error) {
           console.error(`Error in event handler for ${message.type}:`, error);
-          this.emitEvent(WEBSOCKET_EVENTS.ERROR, {
-            type: 'handler_error',
-            eventType: message.type,
-            error: error instanceof Error ? error.message : 'Handler execution failed',
-          });
         }
       });
-    } else {
-      console.debug(`No handlers registered for event type: ${message.type}`);
-    }
-  }
-
-  private emitEvent(type: string, data: unknown): void {
-    const handlers = this.eventHandlers.get(type);
-    if (handlers) {
-      handlers.forEach(handler => handler(data));
     }
   }
 
@@ -201,21 +170,10 @@ export class WebSocketClient {
         console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
         this.connect().catch((error) => {
           console.error('Reconnection failed:', error);
-          this.emitEvent(WEBSOCKET_EVENTS.ERROR, {
-            type: 'reconnect_failed',
-            attempt: this.reconnectAttempts,
-            maxAttempts: this.maxReconnectAttempts,
-            error: error instanceof Error ? error.message : 'Reconnection failed',
-          });
         });
       }, this.reconnectInterval);
     } else {
       console.error('Max reconnection attempts reached');
-      this.emitEvent(WEBSOCKET_EVENTS.ERROR, {
-        type: 'max_reconnect_reached',
-        attempts: this.reconnectAttempts,
-        maxAttempts: this.maxReconnectAttempts,
-      });
     }
   }
 
@@ -230,7 +188,6 @@ export class WebSocketClient {
     };
   }
 
-  // Manual reconnect method
   public async reconnect(): Promise<void> {
     this.disconnect();
     this.reconnectAttempts = 0;
