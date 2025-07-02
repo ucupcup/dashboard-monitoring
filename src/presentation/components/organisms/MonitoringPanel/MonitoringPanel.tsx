@@ -15,8 +15,8 @@ export const MonitoringPanel: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <TemperatureGauge value={tempCelsius} unit="celsius" max={50} threshold={temperatureThreshold} label="Suhu" />
-      <TemperatureGauge value={tempFahrenheit} unit="fahrenheit" max={120} threshold={celsiusToFahrenheit(temperatureThreshold)} label="Suhu Fahrenheit" />
+      <TemperatureGauge value={tempCelsius} unit="celsius" max={100} threshold={temperatureThreshold} label="Suhu" />
+      <TemperatureGauge value={tempFahrenheit} unit="fahrenheit" max={212} threshold={celsiusToFahrenheit(temperatureThreshold)} label="Suhu Fahrenheit" />
       <HumidityGauge value={humidityValue} label="Kelembaban" />
     </div>
   );

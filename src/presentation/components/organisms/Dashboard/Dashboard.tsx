@@ -8,7 +8,7 @@ import { useTemperatureData } from "../../../../app/hooks/useTemperatureData";
 import { useWebSocket } from "../../../../app/hooks/useWebSocket";
 import { useAutoFanControl } from "../../../../app/hooks/useAutoFanControl";
 import { useError, useIsLoading } from "../../../../app/store/dashboardStore";
-import { ConnectionStatus } from "../../molecules/ConnectionStatus/ConnectionStatus";
+// import { ConnectionStatus } from "../../molecules/ConnectionStatus/ConnectionStatus";
 
 
 export const Dashboard: React.FC = () => {
@@ -46,9 +46,9 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Connection Status */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <ConnectionStatus />
-        </div>
+        </div> */}
 
         {/* Monitoring Panel */}
         <div className="mb-8">

@@ -1,5 +1,5 @@
 import { Device } from '../entities/Device';
-import { DeviceCommand, DeviceConfig } from '../entities/Device';
+import type { DeviceCommand, DeviceConfig } from '../types/device';
 
 export interface IDeviceRepository {
   getDevice(deviceId: string): Promise<Device>;
