@@ -42,7 +42,6 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
   // Fetch current data from backend API
   const fetchCurrentData = useCallback(async () => {
     try {
-      console.log('🔄 Fetching current sensor data from backend...');
       setLoading(true);
       
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/sensor-data`);
@@ -52,14 +51,12 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
       }
       
       const result: SensorDataResponse = await response.json();
-      console.log('📊 API Response:', result);
       
       if (result.success && result.data) {
         const data = result.data;
         
         // Update temperature
         if (data.temperature !== undefined) {
-          console.log(`🌡️ Updating temperature: ${data.temperature}°C`);
           const temperature = new Temperature(
             data.temperature, 
             'celsius', 
@@ -71,7 +68,6 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
         
         // Update humidity  
         if (data.humidity !== undefined) {
-          console.log(`💧 Updating humidity: ${data.humidity}%`);
           const humidity = new Humidity(
             data.humidity, 
             new Date(), 
@@ -82,7 +78,6 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
         
         // Update fan state
         if (data.fanState !== undefined) {
-          console.log(`🌪️ Updating fan: ${data.fanState ? 'ON' : 'OFF'}`);
           const fan = new Fan(
             data.deviceId || deviceId, 
             data.fanState ? 'on' : 'off', 
@@ -91,20 +86,22 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
           );
           setFan(fan);
         }
+
+        // Log sensor data update (compact format)
+        console.log(`Sensor Update: T:${data.temperature}°C H:${data.humidity}% Fan:${data.fanState ? 'ON' : 'OFF'}`);
         
-        setError(null); // Clear any previous errors
+        setError(null);
         
       } else {
         throw new Error(result.data ? 'Invalid response format' : 'No data received');
       }
       
     } catch (error) {
-      console.error('❌ Error fetching sensor data:', error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to fetch sensor data";
+      console.error('Sensor data fetch failed:', error instanceof Error ? error.message : error);
       
       // Only set error if WebSocket is also not connected
       if (!isConnected) {
-        setError(errorMessage);
+        setError(error instanceof Error ? error.message : "Failed to fetch sensor data");
       }
     } finally {
       setLoading(false);
@@ -114,21 +111,18 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
   // Legacy temperature service fetch (fallback)
   const fetchCurrentTemperature = useCallback(async () => {
     try {
-      console.log('🔄 Fetching temperature via legacy service...');
       setLoading(true);
       const temperature = await temperatureService.getCurrentTemperature(deviceId);
       setTemperature(temperature);
       setError(null);
     } catch (error) {
-      console.error('❌ Legacy temperature fetch error:', error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to fetch temperature";
+      console.error('Legacy temperature fetch failed:', error instanceof Error ? error.message : error);
       
       // Try the direct API fetch as fallback
       if (!isConnected) {
-        console.log('🔄 Trying direct API fetch as fallback...');
         await fetchCurrentData();
       } else {
-        setError(errorMessage);
+        setError(error instanceof Error ? error.message : "Failed to fetch temperature");
       }
     } finally {
       setLoading(false);
@@ -137,17 +131,15 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
 
   // Subscribe to temperature updates via WebSocket
   const subscribeToTemperatureUpdates = useCallback(() => {
-    console.log('🎯 Setting up temperature subscription...');
-    
     try {
       const unsubscribe = temperatureService.subscribeToUpdates(deviceId, (temperature) => {
-        console.log('📊 Temperature update received via subscription:', temperature);
+        console.log(`WebSocket Update: ${temperature.value}°C`);
         setTemperature(temperature);
       });
 
       return unsubscribe;
     } catch (error) {
-      console.error('❌ Error setting up temperature subscription:', error);
+      console.error('WebSocket subscription failed:', error instanceof Error ? error.message : error);
       return () => {}; // Return empty cleanup function
     }
   }, [deviceId, setTemperature]);
@@ -156,7 +148,7 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
   const startPolling = useCallback(() => {
     if (isPolling.current) return;
     
-    console.log('🔄 Starting HTTP polling (WebSocket disconnected)');
+    console.log('Starting HTTP polling (WebSocket disconnected)');
     isPolling.current = true;
     
     // Initial fetch
@@ -164,9 +156,8 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
     
     // Set up polling interval
     pollingInterval.current = setInterval(() => {
-      console.log('⏰ Polling interval triggered');
       fetchCurrentData();
-    }, 5000); // Poll every 5 seconds
+    }, 1000); // Poll every 5 seconds
     
   }, [fetchCurrentData]);
 
@@ -174,7 +165,7 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
   const stopPolling = useCallback(() => {
     if (!isPolling.current) return;
     
-    console.log('⏹️ Stopping HTTP polling (WebSocket connected)');
+    console.log('Stopping HTTP polling (WebSocket connected)');
     isPolling.current = false;
     
     if (pollingInterval.current) {
@@ -185,12 +176,9 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
 
   // Main effect to handle data fetching strategy
   useEffect(() => {
-    console.log('🎯 useTemperatureData effect triggered');
-    console.log('WebSocket connected:', isConnected);
-    
     if (isConnected) {
       // WebSocket is connected, use subscription + stop polling
-      console.log('✅ Using WebSocket subscription');
+      console.log('Using WebSocket connection');
       stopPolling();
       
       // Try legacy subscription first
@@ -203,7 +191,7 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
       
     } else {
       // WebSocket is not connected, use HTTP polling
-      console.log('📡 WebSocket not connected, using HTTP polling');
+      console.log('Using HTTP polling');
       startPolling();
       
       return () => {
@@ -215,14 +203,12 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
   // Cleanup effect
   useEffect(() => {
     return () => {
-      console.log('🧹 Cleaning up useTemperatureData');
       stopPolling();
     };
   }, [stopPolling]);
 
   // Manual refresh function
   const refresh = useCallback(async () => {
-    console.log('🔄 Manual refresh triggered');
     if (isConnected) {
       await fetchCurrentTemperature();
     } else {
@@ -232,7 +218,7 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
 
   // Force fetch latest data
   const forceRefresh = useCallback(async () => {
-    console.log('💪 Force refresh - bypassing WebSocket');
+    console.log('Force refreshing sensor data');
     await fetchCurrentData();
   }, [fetchCurrentData]);
 
