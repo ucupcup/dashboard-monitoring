@@ -5,7 +5,7 @@ export const config = {
   },
   websocket: {
     url: import.meta.env.VITE_WEBSOCKET_URL || 'ws://192.168.1.7:3001/ws',
-    reconnectInterval: 5000,
+    reconnectInterval: 60000,
     maxRetries: 5,
   },
   device: {

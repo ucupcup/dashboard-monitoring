@@ -157,7 +157,7 @@ export const useTemperatureData = (deviceId: string = config.device.id) => {
     // Set up polling interval
     pollingInterval.current = setInterval(() => {
       fetchCurrentData();
-    }, 1000); // Poll every 5 seconds
+    }, 10000);
     
   }, [fetchCurrentData]);
 
