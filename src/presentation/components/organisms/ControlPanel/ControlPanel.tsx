@@ -6,14 +6,14 @@ import { Button } from "../../../components/atoms/Button/Button";
 import { useDashboardStore } from "../../../../app/store/dashboardStore";
 
 export const ControlPanel: React.FC = () => {
-  const { 
-    manualMode, 
-    temperatureThreshold, 
+  const {
+    manualMode,
+    temperatureThreshold,
     fan,
     isConnected,
     setTemperatureThreshold,
     controlFan,
-    changeModeAndNotifyBackend
+    changeModeAndNotifyBackend,
   } = useDashboardStore();
 
   const [isChangingMode, setIsChangingMode] = useState(false);
@@ -24,7 +24,7 @@ export const ControlPanel: React.FC = () => {
       setIsChangingMode(true);
       await changeModeAndNotifyBackend(manual);
     } catch (error) {
-      console.error('Failed to change mode:', error);
+      console.error("Failed to change mode:", error);
     } finally {
       setIsChangingMode(false);
     }
@@ -35,7 +35,7 @@ export const ControlPanel: React.FC = () => {
       setIsControllingFan(true);
       await controlFan(state);
     } catch (error) {
-      console.error('Failed to control fan:', error);
+      console.error("Failed to control fan:", error);
     } finally {
       setIsControllingFan(false);
     }
@@ -60,9 +60,9 @@ export const ControlPanel: React.FC = () => {
           {/* Mode Toggle */}
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
             <div className="flex items-center justify-between mb-4">
-              <Toggle 
-                isOn={manualMode} 
-                onToggle={() => handleModeChange(!manualMode)} 
+              <Toggle
+                isOn={manualMode}
+                onToggle={() => handleModeChange(!manualMode)}
                 variant={manualMode ? "warning" : "success"}
                 size="lg"
                 disabled={!isConnected || isChangingMode}
@@ -70,39 +70,39 @@ export const ControlPanel: React.FC = () => {
                 animated
               />
               <div className="text-right">
-                <div className={`text-2xl font-bold ${
-                  manualMode ? 'text-orange-400' : 'text-green-400'
-                }`}>
+                <div
+                  className={`text-2xl font-bold ${
+                    manualMode ? "text-orange-400" : "text-green-400"
+                  }`}
+                >
                   {manualMode ? "MANUAL" : "AUTO"}
                 </div>
                 <div className="text-xs text-slate-400">
-                  {manualMode ? 'User Control' : 'Smart Control'}
+                  {manualMode ? "User Control" : "Smart Control"}
                 </div>
               </div>
             </div>
 
             {/* Mode Description */}
-            <div className={`p-3 rounded-lg border transition-all duration-300 ${
-              manualMode 
-                ? 'bg-orange-500/10 border-orange-500/30 text-orange-200' 
-                : 'bg-green-500/10 border-green-500/30 text-green-200'
-            }`}>
+            <div
+              className={`p-3 rounded-lg border transition-all duration-300 ${
+                manualMode
+                  ? "bg-orange-500/10 border-orange-500/30 text-orange-200"
+                  : "bg-green-500/10 border-green-500/30 text-green-200"
+              }`}
+            >
               <div className="flex items-start gap-2">
-                <span className="text-lg">
-                  {manualMode ? '👤' : '🤖'}
-                </span>
+                <span className="text-lg">{manualMode ? "👤" : "🤖"}</span>
                 <div>
                   <div className="font-medium text-sm">
-                    {manualMode 
-                      ? "Manual Control Active" 
-                      : "Automatic Control Active"
-                    }
+                    {manualMode
+                      ? "Manual Control Active"
+                      : "Automatic Control Active"}
                   </div>
                   <div className="text-xs opacity-90 mt-1">
-                    {manualMode 
-                      ? "You have full control over fan operation. Temperature thresholds are ignored." 
-                      : "System automatically controls fan based on temperature readings and thresholds."
-                    }
+                    {manualMode
+                      ? "You have full control over fan operation. Temperature thresholds are ignored."
+                      : "System automatically controls fan based on temperature readings and thresholds."}
                   </div>
                 </div>
               </div>
@@ -115,7 +115,9 @@ export const ControlPanel: React.FC = () => {
                   <span className="text-lg">⚠️</span>
                   <div>
                     <div className="font-medium text-sm">Device Offline</div>
-                    <div className="text-xs opacity-90">Controls disabled until connection is restored</div>
+                    <div className="text-xs opacity-90">
+                      Controls disabled until connection is restored
+                    </div>
                   </div>
                 </div>
               </div>
@@ -131,28 +133,44 @@ export const ControlPanel: React.FC = () => {
             {/* Header */}
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-2xl border border-green-500/30">
-                <div className={`text-2xl transition-all duration-500 ${fan?.state === 'on' ? 'animate-spin' : ''}`}>
+                <div
+                  className={`text-2xl transition-all duration-500 ${
+                    fan?.state === "on" ? "animate-spin" : ""
+                  }`}
+                >
                   🌀
                 </div>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">Manual Fan Control</h3>
-                <p className="text-sm text-slate-400">Direct fan operation control</p>
+                <h3 className="text-xl font-bold text-white">
+                  Manual Fan Control
+                </h3>
+                <p className="text-sm text-slate-400">
+                  Direct fan operation control
+                </p>
               </div>
             </div>
 
             {/* Fan Status Display */}
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-slate-300 font-medium">Current Status:</span>
+                <span className="text-slate-300 font-medium">
+                  Current Status:
+                </span>
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    fan?.state === 'on' ? 'bg-green-500 animate-pulse' : 'bg-slate-500'
-                  }`} />
-                  <span className={`text-lg font-bold ${
-                    fan?.state === 'on' ? 'text-green-400' : 'text-slate-400'
-                  }`}>
-                    {fan?.state === 'on' ? 'RUNNING' : 'STOPPED'}
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      fan?.state === "on"
+                        ? "bg-green-500 animate-pulse"
+                        : "bg-slate-500"
+                    }`}
+                  />
+                  <span
+                    className={`text-lg font-bold ${
+                      fan?.state === "on" ? "text-green-400" : "text-slate-400"
+                    }`}
+                  >
+                    {fan?.state === "on" ? "RUNNING" : "STOPPED"}
                   </span>
                 </div>
               </div>
@@ -163,10 +181,12 @@ export const ControlPanel: React.FC = () => {
                   variant="success"
                   size="lg"
                   onClick={() => handleFanControl(true)}
-                  disabled={!isConnected || fan?.state === 'on' || isControllingFan}
+                  disabled={
+                    !isConnected || fan?.state === "on" || isControllingFan
+                  }
                   leftIcon="▶️"
                   fullWidth
-                  isLoading={isControllingFan && fan?.state !== 'on'}
+                  isLoading={isControllingFan && fan?.state !== "on"}
                 >
                   Start Fan
                 </Button>
@@ -174,10 +194,12 @@ export const ControlPanel: React.FC = () => {
                   variant="danger"
                   size="lg"
                   onClick={() => handleFanControl(false)}
-                  disabled={!isConnected || fan?.state === 'off' || isControllingFan}
+                  disabled={
+                    !isConnected || fan?.state === "off" || isControllingFan
+                  }
                   leftIcon="⏹️"
                   fullWidth
-                  isLoading={isControllingFan && fan?.state !== 'off'}
+                  isLoading={isControllingFan && fan?.state !== "off"}
                 >
                   Stop Fan
                 </Button>
@@ -187,19 +209,19 @@ export const ControlPanel: React.FC = () => {
               <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-700/50">
                 <div className="text-center">
                   <div className="text-lg font-bold text-blue-400">
-                    {fan?.state === 'on' ? '1,250' : '0'}
+                    {fan?.state === "on" ? "1,250" : "0"}
                   </div>
                   <div className="text-xs text-slate-400">RPM</div>
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-bold text-green-400">
-                    {fan?.state === 'on' ? '95%' : '0%'}
+                    {fan?.state === "on" ? "95%" : "0%"}
                   </div>
                   <div className="text-xs text-slate-400">Efficiency</div>
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-bold text-purple-400">
-                    {fan?.state === 'on' ? '2.5W' : '0W'}
+                    {fan?.state === "on" ? "2.5W" : "0W"}
                   </div>
                   <div className="text-xs text-slate-400">Power</div>
                 </div>
@@ -218,20 +240,27 @@ export const ControlPanel: React.FC = () => {
               <span className="text-2xl">🌡️</span>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-white">Temperature Control</h3>
-              <p className="text-sm text-slate-400">Automatic threshold settings</p>
+              <h3 className="text-xl font-bold text-white">
+                Temperature Control
+              </h3>
+              <p className="text-sm text-slate-400">
+                Automatic threshold settings
+              </p>
             </div>
           </div>
 
           {/* Threshold Slider */}
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
-            <Slider 
-              value={temperatureThreshold} 
-              onChange={setTemperatureThreshold} 
-              min={20} 
-              max={40} 
-              step={0.5} 
-              unit="°C" 
+            <Slider
+              value={temperatureThreshold}
+              onChange={(e) => {
+                setTemperatureThreshold(e);
+                console.log({ e });
+              }}
+              min={20}
+              max={40}
+              step={0.5}
+              unit="°C"
               variant="temperature"
               size="lg"
               showValue={true}
@@ -244,27 +273,25 @@ export const ControlPanel: React.FC = () => {
             />
 
             {/* Threshold Info */}
-            <div className={`mt-4 p-3 rounded-lg border transition-all duration-300 ${
-              manualMode 
-                ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-200' 
-                : 'bg-blue-500/10 border-blue-500/30 text-blue-200'
-            }`}>
+            <div
+              className={`mt-4 p-3 rounded-lg border transition-all duration-300 ${
+                manualMode
+                  ? "bg-yellow-500/10 border-yellow-500/30 text-yellow-200"
+                  : "bg-blue-500/10 border-blue-500/30 text-blue-200"
+              }`}
+            >
               <div className="flex items-start gap-2">
-                <span className="text-lg">
-                  {manualMode ? '⚠️' : 'ℹ️'}
-                </span>
+                <span className="text-lg">{manualMode ? "⚠️" : "ℹ️"}</span>
                 <div>
                   <div className="font-medium text-sm">
-                    {manualMode 
-                      ? "Threshold Standby" 
-                      : "Active Threshold Control"
-                    }
+                    {manualMode
+                      ? "Threshold Standby"
+                      : "Active Threshold Control"}
                   </div>
                   <div className="text-xs opacity-90 mt-1">
-                    {manualMode 
-                      ? "This threshold will be used when you switch back to automatic mode." 
-                      : `Fan will automatically turn ON when temperature exceeds ${temperatureThreshold}°C and turn OFF when temperature drops below this threshold.`
-                    }
+                    {manualMode
+                      ? "This threshold will be used when you switch back to automatic mode."
+                      : `Fan will automatically turn ON when temperature exceeds ${temperatureThreshold}°C and turn OFF when temperature drops below this threshold.`}
                   </div>
                 </div>
               </div>

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { TemperatureGauge } from "../../molecules/TemperatureGauge/TemperatureGauge";
-import { HumidityGauge } from "../../molecules/HumidityGauge/HumidityGauge";
-import { useTemperature, useHumidity, useTemperatureThreshold, useFan, useManualMode } from "../../../../app/store/dashboardStore";
+import { useFan, useHumidity, useManualMode, useTemperature, useTemperatureThreshold } from "../../../../app/store/dashboardStore";
 import { celsiusToFahrenheit } from "../../../../shared/utils/converters";
+import { HumidityGauge } from "../../molecules/HumidityGauge/HumidityGauge";
+import { TemperatureGauge } from "../../molecules/TemperatureGauge/TemperatureGauge";
 
-type TimeRange = 'live' | '1h' | '6h' | '1d' | '1w' | '1mo' | '3mo' | '6mo' | '1y';
+// type TimeRange = 'live' | '1h' | '6h' | '1d' | '1w' | '1mo' | '3mo' | '6mo' | '1y';
 
 export const MonitoringPanel: React.FC = () => {
   const temperature = useTemperature();
@@ -13,24 +13,24 @@ export const MonitoringPanel: React.FC = () => {
   const fan = useFan();
   const manualMode = useManualMode();
 
-  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange>('live');
+  // const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange>('live');
   const [isAdjustingThreshold, setIsAdjustingThreshold] = useState(false);
 
   const tempCelsius = temperature?.toCelsius() || 0;
   const tempFahrenheit = temperature?.toFahrenheit() || celsiusToFahrenheit(tempCelsius);
   const humidityValue = humidity?.value || 0;
 
-  const timeRanges: { key: TimeRange; label: string; icon: string }[] = [
-    { key: 'live', label: 'Live', icon: '🔴' },
-    { key: '1h', label: '1H', icon: '🕐' },
-    { key: '6h', label: '6H', icon: '🕕' },
-    { key: '1d', label: '1D', icon: '📅' },
-    { key: '1w', label: '1W', icon: '📊' },
-    { key: '1mo', label: '1M', icon: '📈' },
-    { key: '3mo', label: '3M', icon: '📉' },
-    { key: '6mo', label: '6M', icon: '📋' },
-    { key: '1y', label: '1Y', icon: '🗓️' },
-  ];
+  // const timeRanges: { key: TimeRange; label: string; icon: string }[] = [
+  //   { key: 'live', label: 'Live', icon: '🔴' },
+  //   { key: '1h', label: '1H', icon: '🕐' },
+  //   { key: '6h', label: '6H', icon: '🕕' },
+  //   { key: '1d', label: '1D', icon: '📅' },
+  //   { key: '1w', label: '1W', icon: '📊' },
+  //   { key: '1mo', label: '1M', icon: '📈' },
+  //   { key: '3mo', label: '3M', icon: '📉' },
+  //   { key: '6mo', label: '6M', icon: '📋' },
+  //   { key: '1y', label: '1Y', icon: '🗓️' },
+  // ];
 
   const handleThresholdAdjust = (delta: number) => {
     setIsAdjustingThreshold(true);
@@ -52,7 +52,7 @@ export const MonitoringPanel: React.FC = () => {
         </div>
 
         {/* Enhanced Time Filter Tabs */}
-        <div className="flex flex-wrap gap-2 p-1 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50">
+        {/* <div className="flex flex-wrap gap-2 p-1 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50">
           {timeRanges.map((range) => (
             <button
               key={range.key}
@@ -70,7 +70,7 @@ export const MonitoringPanel: React.FC = () => {
               {range.label}
             </button>
           ))}
-        </div>
+        </div> */}
       </div>
 
       {/* Main Sensor Grid */}
