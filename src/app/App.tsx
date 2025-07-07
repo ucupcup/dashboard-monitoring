@@ -1,8 +1,8 @@
-import React from 'react';
-import { DashboardPage } from '../presentation/pages/DashboardPage';
+import React from "react";
+import { Layout } from "../presentation/pages/Layout";
 
 const App: React.FC = () => {
-  return <DashboardPage />;
+  return <Layout />;
 };
 
 export default App;

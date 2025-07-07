@@ -16,6 +16,7 @@ import {
   useHumidity,
 } from "../../../../app/store/dashboardStore";
 import { useDashboardStore } from "../../../../app/store/dashboardStore";
+import type { LoginDTO } from "../../../../app/hooks/useAuth";
 
 export const Dashboard: React.FC = () => {
   useTemperatureData();
@@ -32,6 +33,13 @@ export const Dashboard: React.FC = () => {
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const token = localStorage.getItem("token");
+  const decoded = token ? (JSON.parse(token) as LoginDTO) : null;
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.reload();
+  };
+
   // Update current time every second
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,34 +48,6 @@ export const Dashboard: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
   console.log({ error, lastUpdate, isConnected });
-  // Error State with Enhanced Design
-  // if (error) {
-  //   return (
-  //     <div className="min-h-screen bg-gradient-to-br from-red-900 via-red-800 to-black flex items-center justify-center p-4">
-  //       <div className="relative">
-  //         {/* Floating error particles */}
-  //         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-  //           <div className="absolute top-10 left-10 w-32 h-32 bg-red-500/20 rounded-full blur-2xl animate-pulse"></div>
-  //           <div className="absolute bottom-10 right-10 w-40 h-40 bg-orange-500/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
-  //         </div>
-
-  //         <div className="relative bg-white/10 backdrop-blur-lg rounded-3xl p-8 text-center border border-red-500/30 shadow-2xl max-w-md">
-  //           <div className="text-6xl mb-6 animate-bounce">⚠️</div>
-  //           <div className="text-red-400 text-2xl font-bold mb-4">
-  //             System Error
-  //           </div>
-  //           <div className="text-white text-lg opacity-90 mb-6">{error}</div>
-  //           <button
-  //             onClick={() => window.location.reload()}
-  //             className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
-  //           >
-  //             Restart System
-  //           </button>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
@@ -106,6 +86,11 @@ export const Dashboard: React.FC = () => {
                 <h1 className="text-3xl lg:text-5xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-teal-400 bg-clip-text text-transparent mb-3">
                   Smart Chicken Farm
                 </h1>
+                {decoded ? (
+                  <p className="text-gray-300 lg:text-3xl text-3xl font-bold mb-6">
+                    Welcome, {decoded.name ?? "-"}
+                  </p>
+                ) : null}
                 <p className="text-gray-300 text-base lg:text-lg font-medium mb-6">
                   🚀 Advanced IoT Monitoring & Automated Control System
                 </p>
@@ -161,6 +146,14 @@ export const Dashboard: React.FC = () => {
                       </span>
                     </div>
                   )}
+                  <div
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 rounded-full border border-purple-500/30 cursor-pointer"
+                    onClick={handleLogout}
+                  >
+                    <span className="text-sm font-semibold text-white">
+                      LOGOUT
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
