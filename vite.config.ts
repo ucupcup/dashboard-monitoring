@@ -27,6 +27,7 @@ export default defineConfig({
       "@utils": path.resolve(__dirname, "./src/shared/utils"),
       "@types": path.resolve(__dirname, "./src/types"),
       "@presentation": path.resolve(__dirname, "./src/presentation"),
+      "@DTO": path.resolve(__dirname, "./src/DTO"),
     },
   },
   server: {
